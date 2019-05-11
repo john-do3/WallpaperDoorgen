@@ -292,19 +292,24 @@ namespace Doorgen.Core.API
                             Directory.CreateDirectory(imageDir);
 
                         Uri uri = new Uri(image.media);
-                        string filename = System.IO.Path.GetFileName(uri.LocalPath);
+                        string localFileName = System.IO.Path.GetFileName(uri.LocalPath);
 
                         WebClient webClient = new WebClient();
                         {
                             try
                             {
                                 logger.Info($"- downloading");
-                                string fileName = $"{imageDir}\\{filename}";
+                                string fileName = $"{imageDir}\\{localFileName}";
 
                                 webClient.DownloadFile(image.media, fileName);
                                 logger.Info($"- download successful");
 
-                                // todo image post processing with xnView
+                                // todo image post processing
+                                //Bitmap img = new Bitmap(fileName);
+                                //Image result = ImagePostProcessHelper.AforgeRotateAutoCrop(img, 5);
+                                
+                                //result.Save(resultFileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                                ImagePostProcessHelper.ImageProcessorRotateAutoCrop(fileName, 5);
 
                                 break; // images iteration
                             }
