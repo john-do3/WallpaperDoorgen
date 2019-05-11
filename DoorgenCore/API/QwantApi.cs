@@ -298,17 +298,13 @@ namespace Doorgen.Core.API
                         {
                             try
                             {
-                                logger.Info($"- downloading");
+                                logger.Info($"- downloading..");
                                 string fileName = $"{imageDir}\\{localFileName}";
 
                                 webClient.DownloadFile(image.media, fileName);
                                 logger.Info($"- download successful");
 
-                                // todo image post processing
-                                //Bitmap img = new Bitmap(fileName);
-                                //Image result = ImagePostProcessHelper.AforgeRotateAutoCrop(img, 5);
-                                
-                                //result.Save(resultFileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                                // image post processing
                                 ImagePostProcessHelper.ImageProcessorRotateAutoCrop(fileName, 5);
 
                                 break; // images iteration

@@ -89,7 +89,7 @@ namespace Doorgen.Core.Helpers
             Logger logger = LogManager.GetCurrentClassLogger();
 
             string imageDir = Path.GetDirectoryName(imageFullPath);
-            string resultFileName = $"{imageDir}\\{Path.GetFileNameWithoutExtension(imageFullPath)}_result.jpg";
+            string resultFileName = $"{imageDir}\\{Path.GetFileNameWithoutExtension(imageFullPath)}_result.jpg";            
 
             try
             {
@@ -102,21 +102,29 @@ namespace Doorgen.Core.Helpers
                     int w = imageFactory.Image.Width;
                     int h = imageFactory.Image.Height;
 
-                    int w1 = Convert.ToInt32(Math.Round(w * Math.Sin(angle)));
-                    int h1 = Convert.ToInt32(Math.Round(h * Math.Sin(angle)));
+                    logger.Info($"- image postprocessing start, input resolution {w}x{h}");
+
+                    int h1 = Convert.ToInt32(Math.Round(w * Math.Sin((angle / 180D) * Math.PI)));
+                    int w1 = Convert.ToInt32(Math.Round(h * Math.Sin((angle / 180D) * Math.PI)));
 
                     imageFactory.Rotate(angle);
 
-                    /* todo crop using w1/h1 dimensions
+                    int newW = imageFactory.Image.Width;
+                    int newH = imageFactory.Image.Height;
+
+                    ImageProcessor.Imaging.CropLayer cropLayer = new ImageProcessor.Imaging.CropLayer(
+                        w1, h1, newW - 2 * w1, newH - 2 * h1, ImageProcessor.Imaging.CropMode.Pixels);
                     
-                    .Crop()
-                    .Save(outputPath);
-                */
+                    imageFactory                   
+                        .Crop(cropLayer)
+                        .Save(resultFileName);
+
+                    logger.Info($"- image postprocessing successful, output resolution {imageFactory.Image.Width}x{imageFactory.Image.Height}");
                 }
             }
             catch (Exception ex)
             {
-                logger.Error(ex.Message);
+                logger.Error($"- image postprocessing error: {ex.Message}");
             }
         }
     }
