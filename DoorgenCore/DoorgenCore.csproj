@@ -33,8 +33,32 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.3.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\..\..\..\..\Users\Roman\AppData\Roaming\packages\BouncyCastle.1.8.3.1\lib\BouncyCastle.Crypto.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Users\Roman\AppData\Roaming\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Users\Roman\AppData\Roaming\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Users\Roman\AppData\Roaming\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="ImageProcessor, Version=2.7.0.100, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\Users\Roman\AppData\Roaming\packages\ImageProcessor.2.7.0.100\lib\net452\ImageProcessor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Users\Roman\AppData\Roaming\packages\MySql.Data.6.9.9\lib\net45\MySql.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MySql.Data.Entity.EF6, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Users\Roman\AppData\Roaming\packages\MySql.Data.Entity.6.9.9\lib\net45\MySql.Data.Entity.EF6.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -46,12 +70,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
@@ -66,15 +97,68 @@
     <Compile Include="API\RuCaptchaApi.cs" />
     <Compile Include="DoorgenCore.cs" />
     <Compile Include="DoorgenOptions.cs" />
+    <Compile Include="Helpers\ConnectionStringBuildHelper.cs" />
     <Compile Include="Helpers\HttpGetHelper.cs" />
     <Compile Include="Helpers\HttpPostHelper.cs" />
+    <Compile Include="Helpers\ImagesImportHelper.cs" />
     <Compile Include="Helpers\ImagePostProcessHelper.cs" />
+    <Compile Include="Models\avcms_tags.cs">
+      <DependentUpon>wssModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\avcms_tag_taxonomy.cs">
+      <DependentUpon>wssModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\avcms_wallpapers.cs">
+      <DependentUpon>wssModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\avcms_wallpaper_categories.cs">
+      <DependentUpon>wssModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\wssModel.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>wssModel.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\wssModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>wssModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\wssModel.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>wssModel.edmx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
+    <EntityDeploy Include="Models\wssModel.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>wssModel.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="Models\wssModel.edmx.diagram">
+      <DependentUpon>wssModel.edmx</DependentUpon>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Models\wssModel.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>wssModel.edmx</DependentUpon>
+      <LastGenOutput>wssModel.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\wssModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>wssModel.edmx</DependentUpon>
+      <LastGenOutput>wssModel.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

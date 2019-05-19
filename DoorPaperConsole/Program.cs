@@ -10,12 +10,12 @@ namespace DoorGenConsole
             int result = 0;
 
             DoorgenCoreClass doorgenCore = new DoorgenCoreClass();
-            if (doorgenCore.CheckConfigs())
+            if (DoorgenCoreClass.CheckConfigs())
             {
                 try
                 {
                     //doorgenCore.WriteTestConfig();
-                    doorgenCore.ReadConfig();
+                    //doorgenCore.ReadConfig();
                     doorgenCore.Process();
                     Console.ReadLine();
                 }

@@ -16,7 +16,12 @@ namespace Doorgen.Core
         DoorgenOptions options = null;
         Logger logger = LogManager.GetCurrentClassLogger();
 
-        public string ExeDir
+        public DoorgenCoreClass()
+        {
+            this.options = DoorgenCoreClass.ReadConfig();
+        }
+
+        public static string ExeDir
         {
             get
             {
@@ -41,19 +46,19 @@ namespace Doorgen.Core
             }
         }
 
-        public bool CheckConfigs()
+        public static bool CheckConfigs()
         {
-            bool configExist = System.IO.File.Exists(this.ExeDir + "config.json");
+            bool configExist = System.IO.File.Exists(DoorgenCoreClass.ExeDir + "config.json");
 
             return configExist;
         }
 
-        public void ReadConfig()
+        public static DoorgenOptions ReadConfig()
         {
-            using (TextReader reader = System.IO.File.OpenText(this.ExeDir + "config.json"))
+            using (TextReader reader = System.IO.File.OpenText(DoorgenCoreClass.ExeDir + "config.json"))
             {
                 string opt = reader.ReadToEnd();
-                options = JsonConvert.DeserializeObject<DoorgenOptions>(opt);
+                return JsonConvert.DeserializeObject<DoorgenOptions>(opt);
             }            
         }
 
