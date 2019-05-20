@@ -1,5 +1,6 @@
 ﻿using Doorgen.Core.Helpers;
 using DoorgenCore.Core.API;
+using DoorgenCore.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -26,6 +27,8 @@ namespace Doorgen.Core.API
             public int height { get; set; }
             // image url
             public string media { get; set; }
+            public string keyword { get; set; }
+            public string title { get; set; }
         }
 
         public class QwantAntiRobotData
@@ -260,6 +263,10 @@ namespace Doorgen.Core.API
         {
             try
             {
+                logger.Info($"Init database categories'");
+                ImagesImportHelper imagesImportHelper = new ImagesImportHelper();
+                imagesImportHelper.InitCategories();
+
                 logger.Info($"Processing keyword '{keywords}'");                
 
                 if (!Directory.Exists(outputPath))
