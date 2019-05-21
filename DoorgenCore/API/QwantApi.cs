@@ -17,9 +17,16 @@ using static DoorgenCore.Core.API.RuCaptchaApi;
 
 namespace Doorgen.Core.API
 {
-    class QwantApi
+    public class QwantApi
     {
         static Logger logger = LogManager.GetCurrentClassLogger();
+        private DoorgenOptions options;
+        private ImagesImportHelper imagesImportHelper;
+
+        public QwantApi(DoorgenOptions options)
+        {
+            this.options = options;            
+        }
 
         public class QwantImage
         {
@@ -27,7 +34,7 @@ namespace Doorgen.Core.API
             public int height { get; set; }
             // image url
             public string media { get; set; }
-            public string keyword { get; set; }
+            public string keywords { get; set; }
             public string title { get; set; }
         }
 
@@ -49,7 +56,7 @@ namespace Doorgen.Core.API
             public int error { get; set; }
         }
 
-        public static string SearchImages(string keywords)
+        public string SearchImages(string keywords)
         {
             // anime%20manga%20wallpaper            
 
@@ -67,7 +74,7 @@ namespace Doorgen.Core.API
             return result.Content.ToString();*/
         }
 
-        internal static bool GetAntiRobot(string outputPath)
+        internal bool GetAntiRobot(string outputPath)
         {
             string qwantCaptchaId = string.Empty;
             string ruCaptchaId = string.Empty;
@@ -98,7 +105,7 @@ namespace Doorgen.Core.API
                 var parameters = new Dictionary<string, string>() {
                     { "coordinatescaptcha", "1" },
                     { "method", "base64"},
-                    { "key", RuCaptchaApi.ruCaptchaApiKey },
+                    { "key", this.options.ruCaptchaApiKey },
                     { "body", result.data.img },
                     { "json", "1" },
                     { "textinstructions", "Найдите фигуру, отличающуюся от остальных" }
@@ -128,7 +135,7 @@ namespace Doorgen.Core.API
                             Thread.Sleep(5000);
 
                             string resQuery = string.Format(RuCaptchaApi.ruCaptchaResUrl, 
-                                RuCaptchaApi.ruCaptchaApiKey, 
+                                this.options.ruCaptchaApiKey, 
                                 "get",
                                 ruCaptchaId
                                 );
@@ -165,7 +172,7 @@ namespace Doorgen.Core.API
                                 //var coordinates = captchaCoordinatesResult.request[0];
 
                                 // send results to QwantApi
-                                bResult = QwantApi.ResolveAntiRobot(qwantCaptchaId, ruCaptchaId, captchaCoordinatesResult.request);                                
+                                bResult = this.ResolveAntiRobot(qwantCaptchaId, ruCaptchaId, captchaCoordinatesResult.request);                                
                             }
 
                             Thread.Sleep(5000);
@@ -180,7 +187,7 @@ namespace Doorgen.Core.API
             return false;
         }
 
-        internal static bool ResolveAntiRobot(string qwantCaptchaId, string ruCaptchaId, List<RuClickCaptchaCoordinates> coordinatesList)
+        internal bool ResolveAntiRobot(string qwantCaptchaId, string ruCaptchaId, List<RuClickCaptchaCoordinates> coordinatesList)
         {
             bool result = false;
             string url = "https://api.qwant.com/api/anti_robot/resolve";
@@ -208,7 +215,7 @@ namespace Doorgen.Core.API
                         // send reportgood
                         logger.Warn("Sending 'reportgood' to ruCaptcha");
                         resQuery = string.Format(RuCaptchaApi.ruCaptchaResUrl,
-                                RuCaptchaApi.ruCaptchaApiKey,
+                                this.options.ruCaptchaApiKey,
                                 "reportgood",
                                 ruCaptchaId
                                 );                        
@@ -226,7 +233,7 @@ namespace Doorgen.Core.API
                 logger.Error("Sending 'reportbad' to ruCaptcha");
                 // send reportbad
                 resQuery = string.Format(RuCaptchaApi.ruCaptchaResUrl,
-                                RuCaptchaApi.ruCaptchaApiKey,
+                                this.options.ruCaptchaApiKey,
                                 "reportbad",
                                 ruCaptchaId
                                 );
@@ -255,17 +262,46 @@ namespace Doorgen.Core.API
 
             return exist;
         }
-        
-        // todo logs
-        // bulk api querying test
 
-        public static void ProcessSearch(string keywords, string outputPath)
+        private bool PromptConfirmation(string confirmText)
         {
+            Console.Write(confirmText + " [y/n] : ");
+            ConsoleKey response = Console.ReadKey(false).Key;
+            Console.WriteLine();
+            return (response == ConsoleKey.Y);
+        }
+
+        public bool Init()
+        {
+            bool result = false;
+
             try
             {
-                logger.Info($"Init database categories'");
-                ImagesImportHelper imagesImportHelper = new ImagesImportHelper();
-                imagesImportHelper.InitCategories();
+                logger.Info($"Connecting to database");
+                this.imagesImportHelper = new ImagesImportHelper();
+
+                if (PromptConfirmation("Do you want to init database categories?"))
+                {
+                    logger.Info($"Processing categories");
+                    imagesImportHelper.InitCategories();
+                }
+
+                imagesImportHelper.ReadCategories();
+
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error($"- init error '{ex.Message}'");
+            }
+
+            return result;
+        }
+
+        public void ProcessSearch(string keywords, string outputPath)
+        {
+            try
+            {                
 
                 logger.Info($"Processing keyword '{keywords}'");                
 
@@ -283,7 +319,7 @@ namespace Doorgen.Core.API
                 }
 
                 logger.Info($"- search for images ->");
-                string sQwantResponse = QwantApi.SearchImages(keywords);
+                string sQwantResponse = this.SearchImages(keywords);
                 JObject jQwantResponse = JObject.Parse(sQwantResponse);
 
                 var items = jQwantResponse["data"]["result"]["items"];
@@ -312,8 +348,12 @@ namespace Doorgen.Core.API
                                 logger.Info($"- download successful");
 
                                 // image post processing
-                                ImagePostProcessHelper.ImageProcessorRotateAutoCrop(fileName, 5);
+                                ImagePostProcessHelper.ImageProcessorRotateAutoCrop(fileName, 5, image);
 
+                                // Import image into database
+                                image.keywords = keywords;
+                                this.imagesImportHelper.ImportImage(image);
+                                
                                 break; // images iteration
                             }
                             catch (WebException ex)
@@ -333,7 +373,7 @@ namespace Doorgen.Core.API
                 {
                     logger.Error($"QwantAPI anti-robot raised. Trying to automatic resolve");
 
-                    if (!QwantApi.GetAntiRobot(outputPath))
+                    if (!this.GetAntiRobot(outputPath))
                     {
                         logger.Error("Automatic captcha resolve failed.");
                         logger.Error("\r\nPlease press Enter to continue");

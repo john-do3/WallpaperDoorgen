@@ -78,18 +78,21 @@ namespace Doorgen.Core
                 // - captchas resolved
                 // - captchas failed 
                 // - some else
-                foreach (string keywords in keywordsArray)
+                QwantApi qwantApi = new QwantApi(this.options);
+                if (qwantApi.Init())
                 {
-                    try
+                    foreach (string keywords in keywordsArray)
                     {
-                        QwantApi.ProcessSearch(keywords, this.options.imagesOutputDir);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Error(ex.Message);
+                        try
+                        {
+                            qwantApi.ProcessSearch(keywords, this.options.imagesOutputDir);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error(ex.Message);
+                        }
                     }
                 }
-
             }        
 
             return 0;

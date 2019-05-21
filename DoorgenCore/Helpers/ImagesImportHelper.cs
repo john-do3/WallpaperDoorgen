@@ -1,10 +1,12 @@
 ﻿using DoorgenCore.Models;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Doorgen.Core.API.QwantApi;
 
 namespace DoorgenCore.Helpers
 {
@@ -18,6 +20,8 @@ namespace DoorgenCore.Helpers
 
     class ImagesImportHelper
     {
+        static Logger logger = LogManager.GetCurrentClassLogger();
+        
         private wssEntities ctx;
 
         public wssEntities bxCtx { get { return ctx; } }
@@ -28,6 +32,8 @@ namespace DoorgenCore.Helpers
 
         // todo process images import into DB 
         // using wssModel
+        Dictionary<int, string> parentCategories;
+        Dictionary<int, string> childCategories;
 
         Dictionary<string, List<string>> categories = new Dictionary<string, List<string>>() {
             {"Abstract", new List<string>{"3D", "Dark", "Fantasy", "Fractal", "Humor", "Sci-Fi", "Texts", "Texture", "Vector" } },
@@ -40,6 +46,21 @@ namespace DoorgenCore.Helpers
             {"World", new List<string> { "Architecture", "Cities", "Flags", "Roads" } }
         };
 
+        public void ReadCategories()
+        {
+            this.parentCategories = new Dictionary<int, string>();
+            this.childCategories = new Dictionary<int, string>();
+
+            var pCategories = ctx.avcms_wallpaper_categories.Where(c => c.parent == null).ToList();
+            var cCategories = ctx.avcms_wallpaper_categories.Where(c => c.parent != null).ToList();
+
+            foreach (avcms_wallpaper_categories category in pCategories)
+                this.parentCategories.Add(Convert.ToInt32(category.id), category.name);
+
+            foreach (avcms_wallpaper_categories category in cCategories)
+                this.childCategories.Add(Convert.ToInt32(category.id), category.name);
+        }
+                    
         public void InitCategories()
         {
             // clear Categories table and init it with default values
@@ -82,6 +103,49 @@ namespace DoorgenCore.Helpers
                 avcmsMainCategory.children = children;
                 ctx.SaveChanges();
             }
+        }
+
+        public void ImportImage(QwantImage image)
+        {
+            // import image into avcms_wallpapers table
+
+            // fill image category
+            string[] keywords = image.keywords.Split(' ');
+            int categoryId = -1;
+
+            foreach (string keyword in keywords)
+            {
+                var category = this.childCategories.FirstOrDefault(kvp => kvp.Value.ToLower().Contains(keyword.ToLower()));
+
+                if (this.childCategories.Contains(category))
+                {
+                    categoryId = category.Key;
+                    break;
+                }
+
+                category = this.parentCategories.FirstOrDefault(kvp => kvp.Value.ToLower().Contains(keyword.ToLower()));
+                if (this.parentCategories.Contains(category))
+                {
+                    categoryId = category.Key;
+                    break;
+                }
+            }
+
+            if (categoryId == -1)
+            {
+                // no categories match, get the random category
+                Random rand = new Random();
+                categoryId = parentCategories.Skip(rand.Next(parentCategories.Count)).First().Key;
+            }
+
+            // fill image tags
+
+            avcms_wallpapers avcmsWallpaper = new avcms_wallpapers()
+            {
+                creator_id = 1,
+                // todo 
+            };
+            
         }
     }
 }

@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Doorgen.Core.API.QwantApi;
 
 namespace Doorgen.Core.Helpers
 {
@@ -84,7 +85,7 @@ namespace Doorgen.Core.Helpers
         }
 #endif
 
-        public static void ImageProcessorRotateAutoCrop(string imageFullPath, float angle)
+        public static void ImageProcessorRotateAutoCrop(string imageFullPath, float angle, QwantImage image)
         {
             Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -119,6 +120,8 @@ namespace Doorgen.Core.Helpers
                         .Crop(cropLayer)
                         .Save(resultFileName);
 
+                    image.width = imageFactory.Image.Width;
+                    image.height = imageFactory.Image.Height;
                     logger.Info($"- image postprocessing successful, output resolution {imageFactory.Image.Width}x{imageFactory.Image.Height}");
                 }
             }
