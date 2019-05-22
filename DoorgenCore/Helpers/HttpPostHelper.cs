@@ -22,7 +22,7 @@ namespace Doorgen.Core.Helpers
         public static string PostRequest(string url, Dictionary<string, string> parameters, out bool result)
         {
             Logger logger = LogManager.GetCurrentClassLogger();
-            logger.Info("Try to send request to " + url);
+            logger.Info("Отправка запроса " + url);
 
             var request = (HttpWebRequest)WebRequest.Create(url);
 
@@ -45,7 +45,7 @@ namespace Doorgen.Core.Helpers
             }
             catch (Exception exc)
             {
-                logger.Error(exc, "Error while sending request");
+                logger.Error(exc, "Ошибка отправки запроса");
                 result = false;
                 return null;
             }
@@ -63,7 +63,7 @@ namespace Doorgen.Core.Helpers
                             {
                                 result = true;
                                 var answerFromServer = streamReader.ReadToEnd();
-                                logger.Info("Server return\n" + answerFromServer);
+                                logger.Info("Ответ сервера\n" + answerFromServer);
                                 return answerFromServer;
                             }
                             else
@@ -77,7 +77,7 @@ namespace Doorgen.Core.Helpers
             }
             catch (Exception exc)
             {
-                logger.Error(exc, "Error while sending request");
+                logger.Error(exc, $"Ошибка во время отправки запроса {exc.Message}");
                 result = false;
                 return null;
             }

@@ -20,6 +20,8 @@ namespace Doorgen.Core.API
     public class QwantApi
     {
         static Logger logger = LogManager.GetCurrentClassLogger();
+        string processedImagesDir;
+
         private DoorgenOptions options;
         private ImagesImportHelper imagesImportHelper;
 
@@ -36,6 +38,7 @@ namespace Doorgen.Core.API
             public string media { get; set; }
             public string keywords { get; set; }
             public string title { get; set; }
+            public string file { get; set; }
         }
 
         public class QwantAntiRobotData
@@ -275,14 +278,23 @@ namespace Doorgen.Core.API
         {
             bool result = false;
 
+            this.processedImagesDir = $"{DoorgenCoreClass.ExeDir}\\processed_images";
+            if (!Directory.Exists(this.processedImagesDir))
+                Directory.CreateDirectory(this.processedImagesDir);
+            
             try
             {
-                logger.Info($"Connecting to database");
+                logger.Info($"Соединяемся с базой данных");
                 this.imagesImportHelper = new ImagesImportHelper();
 
-                if (PromptConfirmation("Do you want to init database categories?"))
+                if (PromptConfirmation("Хотите начать парсинг с нуля? (база данных и все ранее скачанные картинки будут очищены) "))
                 {
-                    logger.Info($"Processing categories");
+                    logger.Info($"Очистка каталога с картинками");
+                    // purge processedImagesDir directory
+                    Directory.Delete(this.processedImagesDir, true);
+                    Directory.CreateDirectory(this.processedImagesDir);
+
+                    logger.Info($"Инициализация базы данных");
                     imagesImportHelper.InitCategories();
                 }
 
@@ -303,22 +315,25 @@ namespace Doorgen.Core.API
             try
             {                
 
-                logger.Info($"Processing keyword '{keywords}'");                
+                logger.Info($"Обработка ключевой фразы '{keywords}'");                
 
                 if (!Directory.Exists(outputPath))
                     Directory.CreateDirectory(outputPath);
 
-                string imageDir = $"{outputPath}\\{keywords}";
+                //string imageDir = $"{outputPath}\\{keywords}";
+                // image path formed avCMS way - {first image name letter}\image name.ext
+                string imageDir = $"{this.processedImagesDir}\\{keywords}";
+
                 if (Directory.Exists(imageDir))
                 {
                     if (Directory.GetFiles(imageDir).Length > 0)
                     {
-                        logger.Warn($"- already processed");
+                        logger.Warn($"- уже обработано");
                         return;
                     }
                 }
 
-                logger.Info($"- search for images ->");
+                logger.Info($"- поиск картинок ->");
                 string sQwantResponse = this.SearchImages(keywords);
                 JObject jQwantResponse = JObject.Parse(sQwantResponse);
 
@@ -328,7 +343,7 @@ namespace Doorgen.Core.API
                 qImages = qImages.OrderByDescending(o => o.width).ToList();
                 foreach (QwantImage image in qImages)
                 {                    
-                    logger.Info($"- checking {image.media}");
+                    logger.Info($"- проверка {image.media}");
                     if (QwantApi.WebFileExist(image.media))
                     {
                         if (!Directory.Exists(imageDir))
@@ -341,17 +356,26 @@ namespace Doorgen.Core.API
                         {
                             try
                             {
-                                logger.Info($"- downloading..");
+                                logger.Info($"- загрузка..");
                                 string fileName = $"{imageDir}\\{localFileName}";
 
                                 webClient.DownloadFile(image.media, fileName);
-                                logger.Info($"- download successful");
+                                logger.Info($"- успешно загружено");
 
                                 // image post processing
-                                ImagePostProcessHelper.ImageProcessorRotateAutoCrop(fileName, 5, image);
+                                fileName = ImagePostProcessHelper.ImageProcessorRotateAutoCrop(fileName, 5, image);
+
+                                // copy image to output (CMS) directory
+                                string outputImageDir = $"{outputPath}\\{localFileName[0]}";
+                                if (!Directory.Exists(outputImageDir))
+                                    Directory.CreateDirectory(outputImageDir);
+
+                                string outputFileName = $"{outputImageDir}\\{localFileName}";
+                                File.Copy(fileName, outputFileName);
 
                                 // Import image into database
                                 image.keywords = keywords;
+                                image.file = $"{localFileName[0]}/{localFileName}";
                                 this.imagesImportHelper.ImportImage(image);
                                 
                                 break; // images iteration

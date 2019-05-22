@@ -138,8 +138,9 @@ namespace DoorgenCore.Helpers
                 categoryId = parentCategories.Skip(rand.Next(parentCategories.Count)).First().Key;
             }
 
-            // fill image tags
+            // todo fill image tags
 
+            // import image into db
             avcms_wallpapers avcmsWallpaper = new avcms_wallpapers()
             {
                 creator_id = 1,

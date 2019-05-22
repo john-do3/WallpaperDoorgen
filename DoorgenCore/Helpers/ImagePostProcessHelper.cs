@@ -85,7 +85,7 @@ namespace Doorgen.Core.Helpers
         }
 #endif
 
-        public static void ImageProcessorRotateAutoCrop(string imageFullPath, float angle, QwantImage image)
+        public static string ImageProcessorRotateAutoCrop(string imageFullPath, float angle, QwantImage image)
         {
             Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -103,7 +103,7 @@ namespace Doorgen.Core.Helpers
                     int w = imageFactory.Image.Width;
                     int h = imageFactory.Image.Height;
 
-                    logger.Info($"- image postprocessing start, input resolution {w}x{h}");
+                    logger.Info($"- пост-обработка изображения, входное разрешение {w}x{h}");
 
                     int h1 = Convert.ToInt32(Math.Round(w * Math.Sin((angle / 180D) * Math.PI)));
                     int w1 = Convert.ToInt32(Math.Round(h * Math.Sin((angle / 180D) * Math.PI)));
@@ -122,13 +122,17 @@ namespace Doorgen.Core.Helpers
 
                     image.width = imageFactory.Image.Width;
                     image.height = imageFactory.Image.Height;
-                    logger.Info($"- image postprocessing successful, output resolution {imageFactory.Image.Width}x{imageFactory.Image.Height}");
+                    logger.Info($"- пост-обработка завершена, выходное разрешение {imageFactory.Image.Width}x{imageFactory.Image.Height}");
+
+                    return resultFileName;
                 }
             }
             catch (Exception ex)
             {
-                logger.Error($"- image postprocessing error: {ex.Message}");
+                logger.Error($"- ошибка пост-обработки: {ex.Message}");
             }
+
+            return string.Empty;
         }
     }
 }
