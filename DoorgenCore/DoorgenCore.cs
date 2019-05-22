@@ -29,7 +29,7 @@ namespace Doorgen.Core
             }
         }
 
-        public void WriteTestConfig()
+        /*public void WriteTestConfig()
         {
             DoorgenOptions options = new DoorgenOptions()
             {
@@ -44,7 +44,7 @@ namespace Doorgen.Core
             {
                 o.WriteTo(writer);
             }
-        }
+        }*/
 
         public static bool CheckConfigs()
         {
@@ -85,13 +85,15 @@ namespace Doorgen.Core
                     {
                         try
                         {
-                            qwantApi.ProcessSearch(keywords, this.options.imagesOutputDir);
+                            qwantApi.ProcessSearch(keywords);
                         }
                         catch (Exception ex)
                         {
                             logger.Error(ex.Message);
                         }
                     }
+
+                    logger.Info("Все ключи обработаны, нажмите Enter для завершения работы.");
                 }
             }        
 

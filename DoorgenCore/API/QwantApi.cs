@@ -24,10 +24,15 @@ namespace Doorgen.Core.API
 
         private DoorgenOptions options;
         private ImagesImportHelper imagesImportHelper;
+        private string imagesOutputDir;
+        private string cmsCachePath;
 
         public QwantApi(DoorgenOptions options)
         {
-            this.options = options;            
+            this.options = options;
+
+            this.imagesOutputDir = $"{options.cmsPath}\\webmaster\\wallpapers";
+            this.cmsCachePath = $"{options.cmsPath}\\cache";
         }
 
         public class QwantImage
@@ -77,7 +82,7 @@ namespace Doorgen.Core.API
             return result.Content.ToString();*/
         }
 
-        internal bool GetAntiRobot(string outputPath)
+        internal bool GetAntiRobot()
         {
             string qwantCaptchaId = string.Empty;
             string ruCaptchaId = string.Empty;
@@ -180,7 +185,7 @@ namespace Doorgen.Core.API
 
                             Thread.Sleep(5000);
                         }
-                        while (!captchaRecognized && (errorsCount < 12));
+                        while (!captchaRecognized && (errorsCount < 10));
                     }
                 }
 
@@ -289,13 +294,23 @@ namespace Doorgen.Core.API
 
                 if (PromptConfirmation("Хотите начать парсинг с нуля? (база данных и все ранее скачанные картинки будут очищены) "))
                 {
+                    logger.Info($"Очистка кэша CMS");
+                    // purge cmsCachePath directory
+                    Directory.Delete(this.cmsCachePath, true);
+                    Directory.CreateDirectory(this.cmsCachePath);
+
                     logger.Info($"Очистка каталога с картинками");
+                    
                     // purge processedImagesDir directory
                     Directory.Delete(this.processedImagesDir, true);
                     Directory.CreateDirectory(this.processedImagesDir);
 
+                    // purge outputdir 
+                    Directory.Delete(this.imagesOutputDir, true);
+                    Directory.CreateDirectory(this.imagesOutputDir);
+
                     logger.Info($"Инициализация базы данных");
-                    imagesImportHelper.InitCategories();
+                    imagesImportHelper.InitDatabase();
                 }
 
                 imagesImportHelper.ReadCategories();
@@ -304,21 +319,21 @@ namespace Doorgen.Core.API
             }
             catch (Exception ex)
             {
-                logger.Error($"- init error '{ex.Message}'");
+                logger.Error($"- init error '{ex.Message}', inner exception {ex.InnerException.Message}'");
             }
 
             return result;
         }
 
-        public void ProcessSearch(string keywords, string outputPath)
+        public void ProcessSearch(string keywords)
         {
             try
             {                
 
                 logger.Info($"Обработка ключевой фразы '{keywords}'");                
 
-                if (!Directory.Exists(outputPath))
-                    Directory.CreateDirectory(outputPath);
+                if (!Directory.Exists(this.imagesOutputDir))
+                    Directory.CreateDirectory(imagesOutputDir);
 
                 //string imageDir = $"{outputPath}\\{keywords}";
                 // image path formed avCMS way - {first image name letter}\image name.ext
@@ -366,7 +381,7 @@ namespace Doorgen.Core.API
                                 fileName = ImagePostProcessHelper.ImageProcessorRotateAutoCrop(fileName, 5, image);
 
                                 // copy image to output (CMS) directory
-                                string outputImageDir = $"{outputPath}\\{localFileName[0]}";
+                                string outputImageDir = $"{imagesOutputDir}\\{localFileName[0]}";
                                 if (!Directory.Exists(outputImageDir))
                                     Directory.CreateDirectory(outputImageDir);
 
@@ -397,7 +412,7 @@ namespace Doorgen.Core.API
                 {
                     logger.Error($"QwantAPI anti-robot raised. Trying to automatic resolve");
 
-                    if (!this.GetAntiRobot(outputPath))
+                    if (!this.GetAntiRobot())
                     {
                         logger.Error("Automatic captcha resolve failed.");
                         logger.Error("\r\nPlease press Enter to continue");

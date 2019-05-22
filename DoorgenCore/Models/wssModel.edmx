@@ -4,18 +4,26 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="wssModel.Store" Provider="MySql.Data.MySqlClient" ProviderManifestToken="5.7" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <!--Errors Found During Generation:
-warning 6002: The table/view 'def.wss.avcms_tag_taxonomy' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+    <Schema Namespace="wssModel.Store" Provider="MySql.Data.MySqlClient" ProviderManifestToken="5.7" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="avcms_hits">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="type" Type="varchar" MaxLength="80" />
+          <Property Name="content_id" Type="int" />
+          <Property Name="date" Type="int" />
+          <Property Name="ip" Type="varchar" MaxLength="20" />
+          <Property Name="column" Type="varchar" MaxLength="80" />
+        </EntityType>
         <EntityType Name="avcms_tag_taxonomy">
           <Key>
-            <PropertyRef Name="content_id" />
-            <PropertyRef Name="taxonomy_id" />
-            <PropertyRef Name="content_type" />
+            <PropertyRef Name="id" />
           </Key>
           <Property Name="content_id" Type="int" Nullable="false" />
           <Property Name="taxonomy_id" Type="int" Nullable="false" />
           <Property Name="content_type" Type="varchar" MaxLength="80" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
         </EntityType>
         <EntityType Name="avcms_tags">
           <Key>
@@ -69,19 +77,13 @@ warning 6002: The table/view 'def.wss.avcms_tag_taxonomy' does not have a primar
           <Property Name="submitter_id" Type="int" />
         </EntityType>
         <EntityContainer Name="wssModelStoreContainer">
+          <EntitySet Name="avcms_hits" EntityType="Self.avcms_hits" Schema="wss" store:Type="Tables" />
+          <EntitySet Name="avcms_tag_taxonomy" EntityType="Self.avcms_tag_taxonomy" Schema="wss" store:Type="Tables" />
           <EntitySet Name="avcms_tags" EntityType="Self.avcms_tags" Schema="wss" store:Type="Tables" />
           <EntitySet Name="avcms_wallpaper_categories" EntityType="Self.avcms_wallpaper_categories" Schema="wss" store:Type="Tables" />
           <EntitySet Name="avcms_wallpapers" EntityType="Self.avcms_wallpapers" Schema="wss" store:Type="Tables" />
-          <EntitySet Name="avcms_tag_taxonomy" EntityType="Self.avcms_tag_taxonomy" store:Type="Tables" store:Schema="wss">
-            <DefiningQuery>SELECT
-`avcms_tag_taxonomy`.`content_id`, 
-`avcms_tag_taxonomy`.`taxonomy_id`, 
-`avcms_tag_taxonomy`.`content_type`
-FROM `avcms_tag_taxonomy` AS `avcms_tag_taxonomy`</DefiningQuery>
-          </EntitySet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="wssModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -138,20 +140,31 @@ FROM `avcms_tag_taxonomy` AS `avcms_tag_taxonomy`</DefiningQuery>
         </EntityType>
         <EntityType Name="avcms_tag_taxonomy">
           <Key>
-            <PropertyRef Name="content_id" />
-            <PropertyRef Name="taxonomy_id" />
-            <PropertyRef Name="content_type" />
+            <PropertyRef Name="id" />
           </Key>
           <Property Name="content_id" Type="Int32" Nullable="false" />
           <Property Name="taxonomy_id" Type="Int32" Nullable="false" />
           <Property Name="content_type" Type="String" MaxLength="80" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
         </EntityType>
         <EntityContainer Name="wssEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="avcms_tags" EntityType="Self.avcms_tags" />
           <EntitySet Name="avcms_wallpaper_categories" EntityType="Self.avcms_wallpaper_categories" />
           <EntitySet Name="avcms_wallpapers" EntityType="Self.avcms_wallpapers" />
           <EntitySet Name="avcms_tag_taxonomy" EntityType="Self.avcms_tag_taxonomy" />
+          <EntitySet Name="avcms_hits" EntityType="wssModel.avcms_hits" />
         </EntityContainer>
+        <EntityType Name="avcms_hits">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="type" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="content_id" Type="Int32" />
+          <Property Name="date" Type="Int32" />
+          <Property Name="ip" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="column" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -215,9 +228,22 @@ FROM `avcms_tag_taxonomy` AS `avcms_tag_taxonomy`</DefiningQuery>
           <EntitySetMapping Name="avcms_tag_taxonomy">
             <EntityTypeMapping TypeName="wssModel.avcms_tag_taxonomy">
               <MappingFragment StoreEntitySet="avcms_tag_taxonomy">
+                <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="content_id" ColumnName="content_id" />
                 <ScalarProperty Name="taxonomy_id" ColumnName="taxonomy_id" />
                 <ScalarProperty Name="content_type" ColumnName="content_type" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="avcms_hits">
+            <EntityTypeMapping TypeName="wssModel.avcms_hits">
+              <MappingFragment StoreEntitySet="avcms_hits">
+                <ScalarProperty Name="column" ColumnName="column" />
+                <ScalarProperty Name="ip" ColumnName="ip" />
+                <ScalarProperty Name="date" ColumnName="date" />
+                <ScalarProperty Name="content_id" ColumnName="content_id" />
+                <ScalarProperty Name="type" ColumnName="type" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

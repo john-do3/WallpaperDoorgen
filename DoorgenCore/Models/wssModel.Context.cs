@@ -32,5 +32,6 @@ namespace DoorgenCore.Models
         public virtual DbSet<avcms_wallpaper_categories> avcms_wallpaper_categories { get; set; }
         public virtual DbSet<avcms_wallpapers> avcms_wallpapers { get; set; }
         public virtual DbSet<avcms_tag_taxonomy> avcms_tag_taxonomy { get; set; }
+        public virtual DbSet<avcms_hits> avcms_hits { get; set; }
     }
 }

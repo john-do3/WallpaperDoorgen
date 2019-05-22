@@ -12,11 +12,13 @@ namespace DoorgenCore.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class avcms_tag_taxonomy
+    public partial class avcms_hits
     {
-        public int content_id { get; set; }
-        public int taxonomy_id { get; set; }
-        public string content_type { get; set; }
-        public int id { get; set; }
+        public long id { get; set; }
+        public string type { get; set; }
+        public Nullable<int> content_id { get; set; }
+        public Nullable<int> date { get; set; }
+        public string ip { get; set; }
+        public string column { get; set; }
     }
 }

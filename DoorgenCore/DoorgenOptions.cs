@@ -8,7 +8,7 @@ namespace Doorgen.Core
     public class DoorgenOptions
     {
         public string keywordsFile { get; set; }
-        public string imagesOutputDir { get; set; }
+        //public string imagesOutputDir { get; set; }
         public string ruCaptchaApiKey { get; set; }
 
         public string dbServer { get; set; }
