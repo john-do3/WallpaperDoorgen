@@ -414,9 +414,10 @@ namespace Doorgen.Core.API
 
                     if (!this.GetAntiRobot())
                     {
-                        logger.Error("Automatic captcha resolve failed.");
-                        logger.Error("\r\nPlease press Enter to continue");
-                        Console.ReadLine();
+                        logger.Error("Automatic captcha resolve failed. Waiting 10 seconds and retry.");
+                        //logger.Error("\r\nPlease press Enter to continue");                        
+                        //Console.ReadLine();
+                        Thread.Sleep(10000);
                     }
                     else
                         logger.Warn("QwantAPI captcha solved, continue processing");

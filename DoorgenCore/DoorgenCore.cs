@@ -93,6 +93,7 @@ namespace Doorgen.Core
                         }
                     }
 
+                    logger.Info("\r\n");
                     logger.Info("Все ключи обработаны, нажмите Enter для завершения работы.");
                 }
             }        
